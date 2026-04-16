@@ -1,0 +1,35 @@
+body {
+    font-family: sans-serif;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+    background-color: #f4f7f6;
+}
+
+#contenedor-calendario {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr); /* 7 días de la semana */
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.dia {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.actividad {
+    padding: 5px;
+    margin: 5px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    border: 1px solid #eee;
+}
+
+.completada {
+    background-color: #a5d6a5; /* Verde para completado */
+    text-decoration: line-through;
+    color: #2e7d32;
+}
