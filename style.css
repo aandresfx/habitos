@@ -1,35 +1,99 @@
 body {
-    font-family: sans-serif;
-    max-width: 1200px;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+    max-width: 1400px;
     margin: 20px auto;
     padding: 0 20px;
-    background-color: #f4f7f6;
+    background-color: #f5f7fa;
 }
 
-#contenedor-calendario {
+h1, h2 {
+    color: #2c3e50;
+}
+
+/* Grid principal del calendario */
+.calendario-grid {
     display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 días de la semana */
-    gap: 10px;
+    grid-template-columns: 80px repeat(7, 1fr);
+    gap: 2px;
+    background-color: #b0bec5;
+    border: 1px solid #b0bec5;
     margin-bottom: 30px;
-}
-
-.dia {
-    background: white;
-    padding: 10px;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
 }
 
-.actividad {
-    padding: 5px;
-    margin: 5px 0;
-    border-radius: 4px;
+.calendario-header {
+    background-color: #34495e;
+    color: white;
+    padding: 12px 5px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.calendario-hora {
+    background-color: #ecf0f1;
+    padding: 8px 5px;
+    text-align: right;
+    font-weight: 500;
+    border-bottom: 1px solid #bdc3c7;
+    font-size: 0.9rem;
+}
+
+.calendario-celda {
+    background-color: white;
+    padding: 6px 4px;
+    min-height: 55px;
+    border-bottom: 1px solid #ecf0f1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+}
+
+.actividad-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
     cursor: pointer;
-    border: 1px solid #eee;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: background-color 0.15s;
+    background-color: #ffffff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 
-.completada {
-    background-color: #a5d6a5; /* Verde para completado */
+.actividad-item:hover {
+    background-color: #eef2f6;
+}
+
+.check-indicador {
+    font-size: 1.3em;
+    min-width: 22px;
+    text-align: center;
+}
+
+.completada .check-indicador {
+    color: #27ae60;
+}
+
+.completada .actividad-texto {
     text-decoration: line-through;
-    color: #2e7d32;
+    color: #7f8c8d;
+}
+
+.actividad-texto {
+    flex: 1;
+    font-size: 0.9rem;
+    word-break: break-word;
+}
+
+/* Estilo para celdas vacías */
+.celda-vacia {
+    color: #b0bec5;
+    font-style: italic;
+    justify-content: center;
+    align-items: center;
+    display: flex;
 }
