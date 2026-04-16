@@ -1,12 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 🔁 REEMPLAZA CON TU URL DE APPS SCRIPT
-    const API_URL = 'https://script.google.com/macros/s/AKfycby.../exec';
+    // 🔁 PEGA AQUÍ LA NUEVA URL DE TU APLICACIÓN WEB DE APPS SCRIPT
+    const API_URL = 'https://script.google.com/macros/s/AKfycbworsjrOF5997P03zn2nLxW18yWc4vrI_XObC6woHctIMy8vNmkhgdrj0QiEY3E9iolHQ/exec';
 
+    let datosGlobales = []; // Por si queremos usarlos después
+
+    // Cargar datos iniciales
     fetch(API_URL)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+            return response.json();
+        })
         .then(datos => {
+            datosGlobales = datos;
             construirCalendarioMatricial(datos);
-            // Aquí más adelante cargaremos los hábitos
         })
         .catch(error => {
             console.error('Error al cargar datos:', error);
@@ -17,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const contenedor = document.getElementById('contenedor-calendario');
         contenedor.innerHTML = '';
 
-        // Extraer horas únicas (formato "HH:MM")
+        // Extraer horas únicas ordenadas
         const horasUnicas = [...new Set(datos.map(d => {
             const fecha = new Date(d.FechaHora);
             return fecha.getHours().toString().padStart(2,'0') + ':' + fecha.getMinutes().toString().padStart(2,'0');
@@ -30,17 +36,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const dias = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
         const diasAbrev = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
-        // Crear el grid
         const grid = document.createElement('div');
         grid.className = 'calendario-grid';
 
-        // Encabezado de la columna de hora
+        // Encabezados
         const headerHora = document.createElement('div');
         headerHora.className = 'calendario-header';
         headerHora.textContent = 'Hora';
         grid.appendChild(headerHora);
 
-        // Encabezados de días
         dias.forEach((_, idx) => {
             const headerDia = document.createElement('div');
             headerDia.className = 'calendario-header';
@@ -48,15 +52,13 @@ document.addEventListener('DOMContentLoaded', function() {
             grid.appendChild(headerDia);
         });
 
-        // Construir filas por cada hora
+        // Filas por cada hora
         horasUnicas.forEach(horaStr => {
-            // Celda de la hora
             const celdaHora = document.createElement('div');
             celdaHora.className = 'calendario-hora';
             celdaHora.textContent = horaStr;
             grid.appendChild(celdaHora);
 
-            // Para cada día, buscar actividad correspondiente
             dias.forEach(dia => {
                 const celda = document.createElement('div');
                 celda.className = 'calendario-celda';
@@ -71,18 +73,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     const divAct = document.createElement('div');
                     divAct.className = 'actividad-item';
                     
-                    // Estado completado
                     const estaCompletado = (actividad.Check === true || actividad.Check === 'TRUE' || actividad.Check === 'true');
-                    if (estaCompletado) {
-                        divAct.classList.add('completada');
-                    }
+                    if (estaCompletado) divAct.classList.add('completada');
 
-                    // Indicador visual del check
                     const indicador = document.createElement('span');
                     indicador.className = 'check-indicador';
                     indicador.textContent = estaCompletado ? '✅' : '⬜';
 
-                    // Texto de la actividad
                     const texto = document.createElement('span');
                     texto.className = 'actividad-texto';
                     texto.textContent = actividad.Actividad || '—';
@@ -90,11 +87,34 @@ document.addEventListener('DOMContentLoaded', function() {
                     divAct.appendChild(indicador);
                     divAct.appendChild(texto);
 
-                    // Evento click para toggle visual (luego conectaremos con Apps Script)
+                    // Evento clic para actualizar check
                     divAct.addEventListener('click', function(e) {
                         e.stopPropagation();
-                        toggleCheckVisual(divAct, actividad);
-                        // TODO: enviar actualización a Google Sheets
+                        const nuevoEstado = !divAct.classList.contains('completada');
+                        
+                        // Actualización visual optimista
+                        if (nuevoEstado) {
+                            divAct.classList.add('completada');
+                            indicador.textContent = '✅';
+                        } else {
+                            divAct.classList.remove('completada');
+                            indicador.textContent = '⬜';
+                        }
+
+                        // Enviar al servidor
+                        enviarActualizacion(actividad.FechaHora, actividad.DiaSemana, nuevoEstado)
+                            .catch(error => {
+                                console.error('Error al guardar:', error);
+                                // Revertir cambio visual
+                                if (nuevoEstado) {
+                                    divAct.classList.remove('completada');
+                                    indicador.textContent = '⬜';
+                                } else {
+                                    divAct.classList.add('completada');
+                                    indicador.textContent = '✅';
+                                }
+                                alert('No se pudo guardar el cambio. Revisa tu conexión.');
+                            });
                     });
 
                     celda.appendChild(divAct);
@@ -110,16 +130,25 @@ document.addEventListener('DOMContentLoaded', function() {
         contenedor.appendChild(grid);
     }
 
-    function toggleCheckVisual(elemento, actividad) {
-        const estaCompletado = elemento.classList.contains('completada');
-        if (estaCompletado) {
-            elemento.classList.remove('completada');
-            elemento.querySelector('.check-indicador').textContent = '⬜';
-        } else {
-            elemento.classList.add('completada');
-            elemento.querySelector('.check-indicador').textContent = '✅';
+    async function enviarActualizacion(fechaHora, diaSemana, nuevoEstado) {
+        const payload = {
+            fechaHora: fechaHora,
+            diaSemana: diaSemana,
+            nuevoEstado: nuevoEstado
+        };
+
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error HTTP: ${response.status}`);
         }
-        // Aquí luego llamaremos a la API para guardar el cambio
-        console.log(`Toggle actividad: ${actividad.Actividad} -> ${!estaCompletado}`);
+
+        const data = await response.json();
+        console.log('Actualización guardada:', data);
+        return data;
     }
 });
