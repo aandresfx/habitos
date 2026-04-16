@@ -10,7 +10,6 @@ h1, h2 {
     color: #2c3e50;
 }
 
-/* Grid principal del calendario */
 .calendario-grid {
     display: grid;
     grid-template-columns: 80px repeat(7, 1fr);
@@ -89,7 +88,6 @@ h1, h2 {
     word-break: break-word;
 }
 
-/* Estilo para celdas vacías */
 .celda-vacia {
     color: #b0bec5;
     font-style: italic;
