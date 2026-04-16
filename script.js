@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     // 🔁 PEGA AQUÍ LA NUEVA URL DE TU APLICACIÓN WEB DE APPS SCRIPT
-    const API_URL = 'https://script.google.com/macros/s/AKfycbworsjrOF5997P03zn2nLxW18yWc4vrI_XObC6woHctIMy8vNmkhgdrj0QiEY3E9iolHQ/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbycZ06CZl5KYickqE-z0Tt6Mpi0NTK7F6oDb3VDcDKTmgzYKtmtq17-MvGLdhyZda9HxQ/exec';
 
     let datosGlobales = []; // Por si queremos usarlos después
 
